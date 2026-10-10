@@ -1,10 +1,13 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { getPopularMovies } from "./services/tmdb";
 import { useState, useEffect } from "react"; // useState hanterar komponentens state. useEffect kör kod efter rendering, till exempel API-anropet i detta fall.
 
 export default function App() {
-  const [movies, setMovies] = useState([]); // Tom filmlista. setMovies uppdaterar listan.
+  // Beskriver filmlistan för typkontrollen: varje film har ett id och en titel.
+  /** @type {{ id: number, title: string }[]} */
+  const initialMovies = [];
+  const [movies, setMovies] = useState(initialMovies); // Tom filmlista. setMovies uppdaterar listan.
   const [loading, setLoading] = useState(true); // true betyder att vi väntar på filmer.
   const [error, setError] = useState(""); // Felmeddelande. Tom text betyder inget fel.
 
@@ -30,6 +33,18 @@ export default function App() {
     <View style={styles.container}>
       <Text style={styles.title}>Movie Jar</Text>
       <Text>Save movies. Shake the jar. Pick your next watch.</Text>
+      {loading && <Text>Loading movies...</Text>}
+      {/* Visar felmeddelandet om error som är sparat i state inte är en tom text. */}
+      {error !== "" && <Text>{error}</Text>}
+      {/* Visar antalet filmer när laddningen är klar och inget fel finns. */}
+      {!loading && error === "" && <Text>Movies loaded: {movies.length}</Text>}
+      {/* Visar filmernas titlar i en rullbar lista. */}
+      <FlatList
+        data={movies}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => <Text>{item.title}</Text>}
+        style={{ width: "100%", maxHeight: 300 }}
+      />
       <StatusBar style="auto" />
     </View>
   );
