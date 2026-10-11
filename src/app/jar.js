@@ -1,7 +1,7 @@
 import { Button, FlatList, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { removeMovie, selectJarMovies } from "../store/jarSlice";
-import { router } from "expo-router";
+import { router, Link } from "expo-router";
 
 // Visar användarens filmburk.
 export default function MyJar() {
@@ -38,7 +38,15 @@ export default function MyJar() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 12 }}>
-            <Text>{item.title}</Text>
+            {/* Öppnar detaljerna för den sparade filmen. */}
+            <Link
+              href={{
+                pathname: "/movie",
+                params: { id: item.id.toString() },
+              }}
+            >
+              {item.title}
+            </Link>
             {/* Tar bort denna film från burken. */}
             <Button
               title="Remove from jar"

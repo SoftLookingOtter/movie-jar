@@ -2,13 +2,20 @@ import { Image, Text, View, Button } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { getMovieDetails } from "../../services/tmdb";
-import { useDispatch } from "react-redux";
-import { addMovie } from "../store/jarSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addMovie, removeMovie, selectJarMovies } from "../store/jarSlice";
 
 // Visar detaljskärmen. Här kommer jag att visa information om en specifik film.
 export default function MovieDetails() {
   const { id } = useLocalSearchParams();
   const dispatch = useDispatch(); // Hämtar funktionen som skickar kommandon till Redux.
+  const savedMovies = useSelector(selectJarMovies); // Läser burkens filmer.
+
+  // Kontrollerar om filmen på denna skärm redan finns i burken.
+  const isInJar = savedMovies.some(
+    (savedMovie) => savedMovie.id.toString() === id,
+  );
+
   // Värdet får vara ett filmobjekt eller null.
   const initialMovie =
     /** @type {{ id: number, title: string, overview: string, poster_path: string | null } | null} */ (
@@ -55,10 +62,16 @@ export default function MovieDetails() {
       {movie !== null && (
         <View>
           <Text>{movie.title}</Text>
-          {/* Skickar filmen till Redux när användaren trycker. */}
+          {/* Lägger till eller tar bort filmen beroende på om den är sparad. */}
           <Button
-            title="Add to jar"
-            onPress={() => dispatch(addMovie(movie))}
+            title={isInJar ? "Remove from jar" : "Add to jar"}
+            onPress={() => {
+              if (isInJar) {
+                dispatch(removeMovie(movie.id));
+              } else {
+                dispatch(addMovie(movie));
+              }
+            }}
           />
           {/* Visar affischen om filmen har en bildsökväg. */}
           {movie.poster_path !== null && (
