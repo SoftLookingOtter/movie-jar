@@ -1,14 +1,15 @@
-import { Image, Text, View, Button } from "react-native";
+import { Image, Text, View, Button, ScrollView } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useState, useEffect } from "react";
 import { getMovieDetails } from "../../services/tmdb";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie, removeMovie, selectJarMovies } from "../store/jarSlice";
 import { getRandomMovie } from "../utils/randomMovie";
+import { filterMoviesByGenre } from "../utils/filterMoviesByGenre";
 
 // Visar detaljskärmen. Här kommer jag att visa information om en specifik film.
 export default function MovieDetails() {
-  const { id, fromShake } = useLocalSearchParams();
+  const { id, fromShake, genreId } = useLocalSearchParams();
   const dispatch = useDispatch(); // Hämtar funktionen som skickar kommandon till Redux.
   const savedMovies = useSelector(selectJarMovies); // Läser burkens filmer.
 
@@ -16,6 +17,10 @@ export default function MovieDetails() {
   const isInJar = savedMovies.some(
     (savedMovie) => savedMovie.id.toString() === id,
   );
+
+  // Gör genrens id från länken till ett nummer. Saknas det används All genres.
+  const selectedGenre = typeof genreId === "string" ? Number(genreId) : 0;
+  const filteredMovies = filterMoviesByGenre(savedMovies, selectedGenre);
 
   // Värdet får vara ett filmobjekt eller null.
   const initialMovie =
@@ -27,12 +32,12 @@ export default function MovieDetails() {
   const [loading, setLoading] = useState(true); // Vi väntar på filmens information.
   const [error, setError] = useState(""); // Tom text betyder inget fel.
 
-  // Slumpar igen bland filmerna som finns i burken.
+  // Slumpar igen bland burkens filmer som matchar den valda genren.
   function handleShakeAgain() {
-    const randomMovie = getRandomMovie(savedMovies);
+    const randomMovie = getRandomMovie(filteredMovies);
 
     if (randomMovie === null) {
-      return; // Avslutar om burken är tom.
+      return; // Avslutar om inga filmer matchar.
     }
 
     router.replace({
@@ -40,6 +45,7 @@ export default function MovieDetails() {
       params: {
         id: randomMovie.id.toString(),
         fromShake: "true",
+        genreId: selectedGenre.toString(), // Behåller samma genrefilter.
       },
     });
   }
@@ -70,9 +76,7 @@ export default function MovieDetails() {
   }, [id]);
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text>Movie details</Text>
-      <Text>Movie ID: {id}</Text>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
       {loading && <Text>Loading movie...</Text>}
       {error !== "" && <Text>{error}</Text>}
 
@@ -85,8 +89,15 @@ export default function MovieDetails() {
             <Button
               title="Shake again"
               onPress={handleShakeAgain}
-              disabled={savedMovies.length === 0}
+              disabled={filteredMovies.length === 0}
             />
+          )}
+          {/* Förklarar varför Shake again är inaktiv om inga filmer matchar. */}
+          {fromShake === "true" && filteredMovies.length === 0 && (
+            <Text>
+              No saved movies match this genre. Go back to My jar to add a movie
+              or select All genres.
+            </Text>
           )}
           {/* Lägger till eller tar bort filmen beroende på om den är sparad. */}
           <Button
@@ -112,6 +123,6 @@ export default function MovieDetails() {
           <Text>{movie.overview}</Text>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }

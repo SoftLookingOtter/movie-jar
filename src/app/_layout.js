@@ -58,7 +58,11 @@ export default function RootLayout() {
   return (
     <Provider store={store}>
       <Stack>
+        {/* Anger rubriken i navigationsfältet för varje skärm. */}
         <Stack.Screen name="index" options={{ title: "Browse movies" }} />
+        <Stack.Screen name="jar" options={{ title: "My jar" }} />
+        <Stack.Screen name="movie" options={{ title: "Movie details" }} />
+        <Stack.Screen name="about" options={{ title: "About" }} />
       </Stack>
     </Provider>
   );

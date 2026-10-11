@@ -10,6 +10,8 @@ import {
 import { getPopularMovies, searchMovies } from "./services/tmdb";
 import { useState, useEffect } from "react"; // useState hanterar komponentens state. useEffect kör kod efter rendering, till exempel API-anropet i detta fall.
 import { Link } from "expo-router"; // Länk som öppnar en annan skärm.
+import GenreFilter from "./src/components/GenreFilter";
+import { filterMoviesByGenre } from "./src/utils/filterMoviesByGenre";
 
 export default function App() {
   // Beskriver filmlistan för typkontrollen: varje film har ett id och en titel.
@@ -19,6 +21,8 @@ export default function App() {
   const [loading, setLoading] = useState(true); // true betyder att vi väntar på filmer.
   const [error, setError] = useState(""); // Felmeddelande. Tom text betyder inget fel.
   const [searchQuery, setSearchQuery] = useState(""); // Sparar texten i sökfältet.
+  const [selectedGenre, setSelectedGenre] = useState(0); // All genres är standard.
+  const filteredMovies = filterMoviesByGenre(movies, selectedGenre); // Väljer vilka av de hämtade filmerna som ska visas.
 
   useEffect(() => {
     async function loadMovies() {
@@ -81,19 +85,23 @@ export default function App() {
       {/* Startar sökningen när användaren trycker på knappen. */}
       <Button title="Search" onPress={handleSearch} disabled={loading} />
       <Link href="/jar">My jar</Link>
+      <Link href="/about">About</Link>
+      <GenreFilter onSelect={setSelectedGenre} />
 
       {loading && <Text>Loading movies...</Text>}
       {/* Visar felmeddelandet om error som är sparat i state inte är en tom text. */}
       {error !== "" && <Text>{error}</Text>}
-      {/* Visar ett meddelande när hämtningen lyckats men filmlistan är tom. */}
-      {!loading && error === "" && movies.length === 0 && (
-        <Text>No movies found. Try another search.</Text>
+      {/* Visar ett meddelande när inga filmer matchar sökningen och filtret. */}
+      {!loading && error === "" && filteredMovies.length === 0 && (
+        <Text>No movies match. Try another search or select All genres.</Text>
       )}
-      {/* Visar antalet filmer när laddningen är klar och inget fel finns. */}
-      {!loading && error === "" && <Text>Movies loaded: {movies.length}</Text>}
-      {/* Visar filmernas titlar (klickbar länk) i en rullbar lista. */}
+
+      {/* Visar antalet filmer som faktiskt visas efter filtreringen. */}
+      {!loading && error === "" && (
+        <Text>Movies shown: {filteredMovies.length}</Text>
+      )}
       <FlatList
-        data={movies}
+        data={filteredMovies}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <Link

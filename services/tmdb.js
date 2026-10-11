@@ -63,3 +63,22 @@ export async function getMovieDetails(movieId) {
   const data = await response.json();
   return data;
 }
+
+// Hämtar TMDb:s filmgenrer med engelska namn.
+export async function getMovieGenres() {
+  const response = await fetch(
+    "https://api.themoviedb.org/3/genre/movie/list?language=en",
+    {
+      headers: {
+        Authorization: "Bearer " + process.env.EXPO_PUBLIC_TMDB_TOKEN,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not load genres. Please try again.");
+  }
+
+  const data = await response.json(); // Läser svaret som JavaScript-data.
+  return data.genres; // Lämnar tillbaka genrelistan.
+}
