@@ -11,6 +11,10 @@ const jarSlice = createSlice({
   name: "jar",
   initialState,
   reducers: {
+    // Återställer burken med filmlistan som lästs från telefonen.
+    restoreJar(state, action) {
+      state.movies = action.payload;
+    },
     addMovie(state, action) {
       const alreadyInJar = state.movies.some(
         (savedMovie) => savedMovie.id === action.payload.id,
@@ -29,7 +33,7 @@ const jarSlice = createSlice({
   },
 });
 
-export const { addMovie, removeMovie } = jarSlice.actions;
+export const { restoreJar, addMovie, removeMovie } = jarSlice.actions;
 export default jarSlice.reducer;
 
 // Plockar ut filmburkens lista från appens gemensamma state.
