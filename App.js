@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { getPopularMovies, searchMovies } from "./services/tmdb";
 import { useState, useEffect } from "react"; // useState hanterar komponentens state. useEffect kör kod efter rendering, till exempel API-anropet i detta fall.
+import { Link } from "expo-router"; // Länk som öppnar en annan skärm.
 
 export default function App() {
   // Beskriver filmlistan för typkontrollen: varje film har ett id och en titel.
@@ -89,11 +90,20 @@ export default function App() {
       )}
       {/* Visar antalet filmer när laddningen är klar och inget fel finns. */}
       {!loading && error === "" && <Text>Movies loaded: {movies.length}</Text>}
-      {/* Visar filmernas titlar i en rullbar lista. */}
+      {/* Visar filmernas titlar (klickbar länk) i en rullbar lista. */}
       <FlatList
         data={movies}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <Text>{item.title}</Text>}
+        renderItem={({ item }) => (
+          <Link
+            href={{
+              pathname: "/movie",
+              params: { id: item.id.toString() },
+            }}
+          >
+            {item.title}
+          </Link>
+        )}
         style={{ width: "100%", maxHeight: 300 }}
       />
       <StatusBar style="auto" />
