@@ -42,3 +42,24 @@ export async function searchMovies(query) {
   const data = await response.json();
   return data.results;
 }
+
+// Hämtar detaljer om en film med hjälp av dess id.
+/** @param {string} movieId Filmens id. */
+export async function getMovieDetails(movieId) {
+  const response = await fetch(
+    "https://api.themoviedb.org/3/movie/" + movieId + "?language=en-US",
+    {
+      headers: {
+        Authorization: "Bearer " + process.env.EXPO_PUBLIC_TMDB_TOKEN,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not load movie details. Please try again.");
+  }
+
+  // Läser svaret och lämnar tillbaka filmens information.
+  const data = await response.json();
+  return data;
+}
