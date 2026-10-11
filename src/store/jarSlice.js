@@ -12,10 +12,28 @@ const jarSlice = createSlice({
   initialState,
   reducers: {
     addMovie(state, action) {
-      state.movies.push(action.payload); // Lägger filmen sist i burkens lista.
+      const alreadyInJar = state.movies.some(
+        (savedMovie) => savedMovie.id === action.payload.id,
+      );
+
+      if (!alreadyInJar) {
+        state.movies.push(action.payload);
+      }
+    },
+    removeMovie(state, action) {
+      // Behåller alla filmer utom den med id:t som skickats med.
+      state.movies = state.movies.filter(
+        (movie) => movie.id !== action.payload,
+      );
     },
   },
 });
 
-export const { addMovie } = jarSlice.actions;
+export const { addMovie, removeMovie } = jarSlice.actions;
 export default jarSlice.reducer;
+
+// Plockar ut filmburkens lista från appens gemensamma state.
+/** @param {{ jar: typeof initialState }} state */
+export function selectJarMovies(state) {
+  return state.jar.movies;
+}

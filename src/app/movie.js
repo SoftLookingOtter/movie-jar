@@ -1,11 +1,14 @@
-import { Image, Text, View } from "react-native";
+import { Image, Text, View, Button } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { getMovieDetails } from "../../services/tmdb";
+import { useDispatch } from "react-redux";
+import { addMovie } from "../store/jarSlice";
 
 // Visar detaljskärmen. Här kommer jag att visa information om en specifik film.
 export default function MovieDetails() {
   const { id } = useLocalSearchParams();
+  const dispatch = useDispatch(); // Hämtar funktionen som skickar kommandon till Redux.
   // Värdet får vara ett filmobjekt eller null.
   const initialMovie =
     /** @type {{ id: number, title: string, overview: string, poster_path: string | null } | null} */ (
@@ -52,6 +55,11 @@ export default function MovieDetails() {
       {movie !== null && (
         <View>
           <Text>{movie.title}</Text>
+          {/* Skickar filmen till Redux när användaren trycker. */}
+          <Button
+            title="Add to jar"
+            onPress={() => dispatch(addMovie(movie))}
+          />
           {/* Visar affischen om filmen har en bildsökväg. */}
           {movie.poster_path !== null && (
             <Image

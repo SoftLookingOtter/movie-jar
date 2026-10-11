@@ -80,6 +80,7 @@ export default function App() {
 
       {/* Startar sökningen när användaren trycker på knappen. */}
       <Button title="Search" onPress={handleSearch} disabled={loading} />
+      <Link href="/jar">My jar</Link>
 
       {loading && <Text>Loading movies...</Text>}
       {/* Visar felmeddelandet om error som är sparat i state inte är en tom text. */}
