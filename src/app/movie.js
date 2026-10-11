@@ -1,13 +1,14 @@
 import { Image, Text, View, Button } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { useState, useEffect } from "react";
 import { getMovieDetails } from "../../services/tmdb";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie, removeMovie, selectJarMovies } from "../store/jarSlice";
+import { getRandomMovie } from "../utils/randomMovie";
 
 // Visar detaljskärmen. Här kommer jag att visa information om en specifik film.
 export default function MovieDetails() {
-  const { id } = useLocalSearchParams();
+  const { id, fromShake } = useLocalSearchParams();
   const dispatch = useDispatch(); // Hämtar funktionen som skickar kommandon till Redux.
   const savedMovies = useSelector(selectJarMovies); // Läser burkens filmer.
 
@@ -25,6 +26,23 @@ export default function MovieDetails() {
   const [movie, setMovie] = useState(initialMovie); // Ingen film hämtad från början.
   const [loading, setLoading] = useState(true); // Vi väntar på filmens information.
   const [error, setError] = useState(""); // Tom text betyder inget fel.
+
+  // Slumpar igen bland filmerna som finns i burken.
+  function handleShakeAgain() {
+    const randomMovie = getRandomMovie(savedMovies);
+
+    if (randomMovie === null) {
+      return; // Avslutar om burken är tom.
+    }
+
+    router.replace({
+      pathname: "/movie",
+      params: {
+        id: randomMovie.id.toString(),
+        fromShake: "true",
+      },
+    });
+  }
 
   // Hämtar filmens detaljer när skärmen öppnas eller filmens id ändras.
   useEffect(() => {
@@ -62,6 +80,14 @@ export default function MovieDetails() {
       {movie !== null && (
         <View>
           <Text>{movie.title}</Text>
+          {/* Visar slumpknappen när filmen öppnats genom en slumpning. */}
+          {fromShake === "true" && (
+            <Button
+              title="Shake again"
+              onPress={handleShakeAgain}
+              disabled={savedMovies.length === 0}
+            />
+          )}
           {/* Lägger till eller tar bort filmen beroende på om den är sparad. */}
           <Button
             title={isInJar ? "Remove from jar" : "Add to jar"}
