@@ -1,3 +1,6 @@
+// Hämtar filmdata från TMDb:s API:
+// populära filmer, sökresultat, filmdetaljer och genrer.
+
 export async function getPopularMovies() {
   // Skickar förfrågan till TMDb och väntar på svaret.
   const response = await fetch(
@@ -10,6 +13,7 @@ export async function getPopularMovies() {
     },
   );
 
+  // Avbryter med ett fel om API:et svarar att förfrågan misslyckades.
   if (!response.ok) {
     throw new Error("Could not load movies. Please try again.");
   }

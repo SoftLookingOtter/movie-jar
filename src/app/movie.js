@@ -1,3 +1,6 @@
+// Visar detaljer om en film och låter användaren ändra burken.
+// Samma skärm används även för filmer som slumpats fram.
+
 import { Image, Text, View, Button, ScrollView } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useState, useEffect } from "react";
@@ -7,50 +10,49 @@ import { addMovie, removeMovie, selectJarMovies } from "../store/jarSlice";
 import { getRandomMovie } from "../utils/randomMovie";
 import { filterMoviesByGenre } from "../utils/filterMoviesByGenre";
 
-// Visar detaljskärmen. Här kommer jag att visa information om en specifik film.
 export default function MovieDetails() {
   const { id, fromShake, genreId } = useLocalSearchParams();
-  const dispatch = useDispatch(); // Hämtar funktionen som skickar kommandon till Redux.
-  const savedMovies = useSelector(selectJarMovies); // Läser burkens filmer.
+  const dispatch = useDispatch();
+  const savedMovies = useSelector(selectJarMovies);
 
-  // Kontrollerar om filmen på denna skärm redan finns i burken.
+  // Avgör om knappen ska visa Add to jar eller Remove from jar.
   const isInJar = savedMovies.some(
     (savedMovie) => savedMovie.id.toString() === id,
   );
 
-  // Gör genrens id från länken till ett nummer. Saknas det används All genres.
+  // Använder genren från länken. Saknas den väljs All genres (0).
   const selectedGenre = typeof genreId === "string" ? Number(genreId) : 0;
   const filteredMovies = filterMoviesByGenre(savedMovies, selectedGenre);
 
-  // Värdet får vara ett filmobjekt eller null.
   const initialMovie =
     /** @type {{ id: number, title: string, overview: string, poster_path: string | null } | null} */ (
       null
     );
 
-  const [movie, setMovie] = useState(initialMovie); // Ingen film hämtad från början.
-  const [loading, setLoading] = useState(true); // Vi väntar på filmens information.
-  const [error, setError] = useState(""); // Tom text betyder inget fel.
+  const [movie, setMovie] = useState(initialMovie);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Slumpar igen bland burkens filmer som matchar den valda genren.
+  // Slumpar igen bland sparade filmer som matchar burkens genrefilter.
   function handleShakeAgain() {
     const randomMovie = getRandomMovie(filteredMovies);
 
     if (randomMovie === null) {
-      return; // Avslutar om inga filmer matchar.
+      return;
     }
 
+    // Byter ut filmen så att bakåtknappen fortfarande leder till My jar.
     router.replace({
       pathname: "/movie",
       params: {
         id: randomMovie.id.toString(),
         fromShake: "true",
-        genreId: selectedGenre.toString(), // Behåller samma genrefilter.
+        genreId: selectedGenre.toString(),
       },
     });
   }
 
-  // Hämtar filmens detaljer när skärmen öppnas eller filmens id ändras.
+  // Hämtar detaljer när skärmen öppnas eller filmens id ändras.
   useEffect(() => {
     async function loadMovie() {
       setLoading(true);
@@ -58,21 +60,20 @@ export default function MovieDetails() {
       setMovie(null);
 
       try {
-        // Kontrollerar att länken skickat med ett id som text.
         if (typeof id !== "string") {
           throw new Error("Missing movie ID.");
         }
 
         const fetchedMovie = await getMovieDetails(id);
-        setMovie(fetchedMovie); // Sparar filmens information i state.
+        setMovie(fetchedMovie);
       } catch {
         setError("Could not load movie details. Please try again.");
       } finally {
-        setLoading(false); // Avslutar laddningen även om något gick fel.
+        setLoading(false);
       }
     }
 
-    loadMovie(); // Startar hämtningen.
+    loadMovie();
   }, [id]);
 
   return (
@@ -80,11 +81,11 @@ export default function MovieDetails() {
       {loading && <Text>Loading movie...</Text>}
       {error !== "" && <Text>{error}</Text>}
 
-      {/* Visar filminformationen när en film har hämtats. */}
       {movie !== null && (
         <View>
           <Text>{movie.title}</Text>
-          {/* Visar slumpknappen när filmen öppnats genom en slumpning. */}
+
+          {/* Shake again visas när filmen har öppnats genom en slumpning. */}
           {fromShake === "true" && (
             <Button
               title="Shake again"
@@ -92,14 +93,15 @@ export default function MovieDetails() {
               disabled={filteredMovies.length === 0}
             />
           )}
-          {/* Förklarar varför Shake again är inaktiv om inga filmer matchar. */}
+
           {fromShake === "true" && filteredMovies.length === 0 && (
             <Text>
               No saved movies match this genre. Go back to My jar to add a movie
               or select All genres.
             </Text>
           )}
-          {/* Lägger till eller tar bort filmen beroende på om den är sparad. */}
+
+          {/* Skickar ett kommando till Redux för att lägga till eller ta bort filmen. */}
           <Button
             title={isInJar ? "Remove from jar" : "Add to jar"}
             onPress={() => {
@@ -110,7 +112,7 @@ export default function MovieDetails() {
               }
             }}
           />
-          {/* Visar affischen om filmen har en bildsökväg. */}
+
           {movie.poster_path !== null && (
             <Image
               source={{
@@ -120,6 +122,7 @@ export default function MovieDetails() {
               resizeMode="contain"
             />
           )}
+
           <Text>{movie.overview}</Text>
         </View>
       )}

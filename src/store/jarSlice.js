@@ -1,20 +1,25 @@
+// Här finns reglerna(restoreJar, addMovie, removeMovie) för att ändra innehållet i filmburken.
+
 import { createSlice } from "@reduxjs/toolkit";
 
-// Burken börjar med en tom filmlista.
+// Burkens startvärde: en tom filmlista.
 /** @type {{ movies: { id: number, title: string }[] }} */
 const initialState = {
   movies: [],
 };
 
-// Definierar burkens state och hur det får ändras.
+// Skapar själva burkskivan (jarSlice=Redux-slice för filmburken) med dess kommandon och regler.
 const jarSlice = createSlice({
   name: "jar",
-  initialState,
+  initialState, // Burkens startvärde.
+  // Samlar reglerna som Redux använder för att ändra burkens innehåll.
   reducers: {
-    // Återställer burken med filmlistan som lästs från telefonen.
+    // RESTORE: återställer burken med tidigare sparade filmer (från telefonen).
     restoreJar(state, action) {
       state.movies = action.payload;
     },
+
+    // ADD: lägger till en ny film i burken om den inte redan finns.
     addMovie(state, action) {
       const alreadyInJar = state.movies.some(
         (savedMovie) => savedMovie.id === action.payload.id,
@@ -24,8 +29,9 @@ const jarSlice = createSlice({
         state.movies.push(action.payload);
       }
     },
+
+    // REMOVE: tar bort en film från burken.
     removeMovie(state, action) {
-      // Behåller alla filmer utom den med id:t som skickats med.
       state.movies = state.movies.filter(
         (movie) => movie.id !== action.payload,
       );
@@ -33,10 +39,13 @@ const jarSlice = createSlice({
   },
 });
 
+// Gör burkens kommandon tillgängliga för andra filer. Används av komponenter som vill ändra innehållet i filmburken.
 export const { restoreJar, addMovie, removeMovie } = jarSlice.actions;
+
+// Exporterar funktionen som Redux byggt av reglerna ovan, som  väljer och kör rätt reducer baserat på inkommande actions. Används av store.js.
 export default jarSlice.reducer;
 
-// Plockar ut filmburkens lista från appens gemensamma state.
+// Hämtar filmlistan från den gemensamma burken.
 /** @param {{ jar: typeof initialState }} state */
 export function selectJarMovies(state) {
   return state.jar.movies;

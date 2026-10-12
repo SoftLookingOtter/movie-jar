@@ -1,3 +1,5 @@
+// Visar sparade filmer i My jar och låter användaren ta bort eller slumpa filmer.
+
 import { Button, FlatList, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { removeMovie, selectJarMovies } from "../store/jarSlice";
@@ -7,27 +9,26 @@ import { useState } from "react";
 import GenreFilter from "../components/GenreFilter";
 import { filterMoviesByGenre } from "../utils/filterMoviesByGenre";
 
-// Visar användarens filmburk.
 export default function MyJar() {
-  const movies = useSelector(selectJarMovies); // Läser filmerna i burken.
+  const movies = useSelector(selectJarMovies); // Läser burkens lista från Redux.
   const dispatch = useDispatch();
-  const [selectedGenre, setSelectedGenre] = useState(0); // All genres är standard.
-  const filteredMovies = filterMoviesByGenre(movies, selectedGenre); // Filmer som matchar genren.
+  const [selectedGenre, setSelectedGenre] = useState(0); // 0 betyder All genres.
+  const filteredMovies = filterMoviesByGenre(movies, selectedGenre);
 
-  // Slumpar en film ur burken och öppnar dess detaljer.
+  // Slumpar en film som matchar genrefiltret och öppnar dess detaljer.
   function handleShake() {
     const randomMovie = getRandomMovie(filteredMovies);
 
     if (randomMovie === null) {
-      return; // Avslutar om burken är tom.
+      return;
     }
 
     router.push({
       pathname: "/movie",
       params: {
         id: randomMovie.id.toString(),
-        fromShake: "true",
-        genreId: selectedGenre.toString(), // Skickar med burkens valda genre.
+        fromShake: "true", // Gör att detaljskärmen visar Shake again.
+        genreId: selectedGenre.toString(), // Behåller filtret på detaljskärmen.
       },
     });
   }
@@ -35,19 +36,18 @@ export default function MyJar() {
   return (
     <View style={{ flex: 1, padding: 20 }}>
       <GenreFilter onSelect={setSelectedGenre} />
-      {/* Slumpar en film när användaren trycker. */}
+
       <Button
         title="Shake the jar"
         onPress={handleShake}
         disabled={filteredMovies.length === 0}
       />
-      {/* Visar filmerna som sparats i burken. */}
+
       <FlatList
         data={filteredMovies}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 12 }}>
-            {/* Öppnar detaljerna för den sparade filmen. */}
             <Link
               href={{
                 pathname: "/movie",
@@ -56,7 +56,7 @@ export default function MyJar() {
             >
               {item.title}
             </Link>
-            {/* Tar bort denna film från burken. */}
+
             <Button
               title="Remove from jar"
               onPress={() => dispatch(removeMovie(item.id))}

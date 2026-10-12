@@ -1,3 +1,6 @@
+// Sparar och läser tillbaka filmburken på telefonen med AsyncStorage.
+// saveJar sparar burken och loadJar läser tillbaka den.
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Sparar burkens filmlista på telefonen.

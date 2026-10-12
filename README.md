@@ -82,7 +82,7 @@ An internet connection is required to fetch movie data from TMDB.
 Run lint and JavaScript type checking:
 
 ```bash
-npx expo lint App.js index.js services src
+npx expo lint services src
 npx tsc --noEmit
 ```
 

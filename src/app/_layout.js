@@ -1,3 +1,6 @@
+// Ger skärmarna tillgång till Redux-store i store.js, där burkens filmlista finns.
+// // Använder jarStorage.js för att läsa och spara burken på telefonen (lokal lagring genom AsyncStorage).
+
 import { Stack } from "expo-router";
 import { Provider } from "react-redux";
 import { store } from "../store/store";
@@ -6,34 +9,33 @@ import { loadJar, saveJar } from "../../services/jarStorage";
 import { restoreJar } from "../store/jarSlice";
 import { Text } from "react-native";
 
-// Ger alla skärmar tillgång till vår Redux-store.
 export default function RootLayout() {
-  const [jarLoaded, setJarLoaded] = useState(false); // Har den sparade burken lästs klart?
-  const [storageError, setStorageError] = useState(""); // Felmeddelande för lagringen.
+  const [jarLoaded, setJarLoaded] = useState(false); // Är den sparade burken inläst?
+  const [storageError, setStorageError] = useState(""); // Feltext vid läsning eller sparande.
 
-  // Läser den sparade burken när appen startar.
+  // Läser den sparade filmlistan när appen startar.
   useEffect(() => {
     async function loadSavedJar() {
       try {
-        const savedMovies = await loadJar(); // Läser listan från telefonen.
-        store.dispatch(restoreJar(savedMovies)); // Lägger listan i Redux.
-        setJarLoaded(true); // Läsningen lyckades.
+        const savedMovies = await loadJar(); // Läser den sparade filmlistan från telefonen.
+        store.dispatch(restoreJar(savedMovies)); // Skickar listan till Redux.
+        setJarLoaded(true);
       } catch {
         setStorageError("Could not load your jar. Please restart the app.");
       }
     }
 
-    loadSavedJar(); // Startar läsningen.
+    loadSavedJar(); // Kör funktionen ovan när appen startar (men kör inte igen vid senare renderingar)
   }, []);
 
-  // Sparar burken när Redux får en uppdatering.
+  // Lyssnar på Redux och sparar burkens aktuella lista på telefonen.
   useEffect(() => {
     if (!jarLoaded) {
-      return; // Börjar inte spara förrän den gamla burken har lästs.
+      return; // Väntar med sparandet tills den gamla listan har lästs.
     }
 
     const unsubscribe = store.subscribe(() => {
-      const movies = store.getState().jar.movies; // Läser burkens aktuella lista.
+      const movies = store.getState().jar.movies;
 
       saveJar(movies).catch(() => {
         setStorageError(
@@ -42,23 +44,24 @@ export default function RootLayout() {
       });
     });
 
-    return unsubscribe; // Slutar lyssna när effekten städas bort.
+    return unsubscribe; // React använder denna funktion för att avsluta lyssningen.
   }, [jarLoaded]);
 
-  // Visar ett meddelande om läsningen misslyckades.
+  // Visar fel vid läsning eller sparande.
   if (storageError !== "") {
     return <Text style={{ marginTop: 60 }}>{storageError}</Text>;
   }
 
-  // Väntar med att visa appens skärmar tills burken har lästs.
+  // Visar laddningstext tills den sparade burken är inläst.
   if (!jarLoaded) {
     return <Text style={{ marginTop: 60 }}>Loading your jar...</Text>;
   }
 
+  // Provider ger skärmarna nedan tillgång till vår Redux-store.
   return (
     <Provider store={store}>
       <Stack>
-        {/* Anger rubriken i navigationsfältet för varje skärm. */}
+        {/* Rubriken högst upp på varje skärm. */}
         <Stack.Screen name="index" options={{ title: "Browse movies" }} />
         <Stack.Screen name="jar" options={{ title: "My jar" }} />
         <Stack.Screen name="movie" options={{ title: "Movie details" }} />
