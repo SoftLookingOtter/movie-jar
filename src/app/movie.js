@@ -1,7 +1,14 @@
 // Visar detaljer om en film och låter användaren ändra burken.
 // Samma skärm används även för filmer som slumpats fram.
 
-import { Image, Text, View, Button, ScrollView } from "react-native";
+import {
+  Image,
+  Text,
+  View,
+  ScrollView,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useState, useEffect } from "react";
 import { getMovieDetails } from "../../services/tmdb";
@@ -77,21 +84,30 @@ export default function MovieDetails() {
   }, [id]);
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: "#f0e6ff" }}
+      contentContainerStyle={{ padding: 20 }}
+    >
       {loading && <Text>Loading movie...</Text>}
       {error !== "" && <Text>{error}</Text>}
 
       {movie !== null && (
         <View>
-          <Text>{movie.title}</Text>
+          <Text style={styles.title}>{movie.title}</Text>
 
           {/* Shake again visas när filmen har öppnats genom en slumpning. */}
           {fromShake === "true" && (
-            <Button
-              title="Shake again"
+            <Pressable
               onPress={handleShakeAgain}
               disabled={filteredMovies.length === 0}
-            />
+              accessibilityRole="button"
+              style={({ pressed }) => [
+                styles.button,
+                { opacity: filteredMovies.length === 0 || pressed ? 0.6 : 1 },
+              ]}
+            >
+              <Text style={styles.buttonText}>Shake again</Text>
+            </Pressable>
           )}
 
           {fromShake === "true" && filteredMovies.length === 0 && (
@@ -102,8 +118,8 @@ export default function MovieDetails() {
           )}
 
           {/* Skickar ett kommando till Redux för att lägga till eller ta bort filmen. */}
-          <Button
-            title={isInJar ? "Remove from jar" : "Add to jar"}
+          <Pressable
+            accessibilityRole="button"
             onPress={() => {
               if (isInJar) {
                 dispatch(removeMovie(movie.id));
@@ -111,21 +127,69 @@ export default function MovieDetails() {
                 dispatch(addMovie(movie));
               }
             }}
-          />
+            style={({ pressed }) => [
+              styles.button,
+              isInJar && styles.removeButton,
+              { opacity: pressed ? 0.6 : 1 },
+            ]}
+          >
+            <Text style={[styles.buttonText, isInJar && styles.removeText]}>
+              {isInJar ? "Remove from jar" : "Add to jar"}
+            </Text>
+          </Pressable>
 
           {movie.poster_path !== null && (
             <Image
               source={{
                 uri: "https://image.tmdb.org/t/p/w500" + movie.poster_path,
               }}
-              style={{ width: 200, height: 300 }}
+              style={styles.poster}
               resizeMode="contain"
             />
           )}
 
-          <Text>{movie.overview}</Text>
+          <Text style={styles.description}>{movie.overview}</Text>
         </View>
       )}
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: "#6b3fa0",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  removeButton: {
+    backgroundColor: "#fbe9ef",
+  },
+  removeText: {
+    color: "#9c2845",
+  },
+  poster: {
+    width: "55%",
+    aspectRatio: 2 / 3,
+    alignSelf: "center",
+    borderRadius: 12,
+    marginVertical: 50,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#2f1b46",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  description: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#443550",
+  },
+});

@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { loadJar, saveJar } from "../../services/jarStorage";
 import { restoreJar } from "../store/jarSlice";
 import { Text } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
   const [jarLoaded, setJarLoaded] = useState(false); // Är den sparade burken inläst?
@@ -64,9 +65,22 @@ export default function RootLayout() {
   // 2. Provider ger skärmarna nedan tillgång till vår Redux-store.
   return (
     <Provider store={store}>
-      <Stack>
+      <StatusBar style="dark" />
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "#f0e6ff",
+          },
+          headerTintColor: "#6b3fa0",
+          headerTitleAlign: "center",
+          headerShadowVisible: false,
+        }}
+      >
         {/* Rubriken högst upp på varje skärm. */}
-        <Stack.Screen name="index" options={{ title: "Browse movies" }} />
+        <Stack.Screen
+          name="index"
+          options={{ title: "Browse movies", headerShown: false }}
+        />
         <Stack.Screen name="jar" options={{ title: "My jar" }} />
         <Stack.Screen name="movie" options={{ title: "Movie details" }} />
         <Stack.Screen name="about" options={{ title: "About" }} />

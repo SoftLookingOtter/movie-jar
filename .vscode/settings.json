@@ -5,9 +5,11 @@
     "detaljvyn",
     "dispatchfunktionen",
     "filmdatan",
+    "mountas",
     "moviejar",
     "scrollbara",
     "slumpning",
     "tokenen"
-  ]
+  ],
+  "cSpell.words": ["Pressable"]
 }

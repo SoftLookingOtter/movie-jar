@@ -1,11 +1,11 @@
 // Visar genreknappar som används i katalogen och i My jar.
 
-import { Button, View, Text, ScrollView } from "react-native";
+import { Pressable, StyleSheet, View, Text, ScrollView } from "react-native";
 import { useState, useEffect } from "react";
 import { getMovieGenres } from "../../services/tmdb";
 
-/** @param {{ onSelect: (genreId: number) => void }} props */
-export default function GenreFilter({ onSelect }) {
+/** @param {{ selectedGenre: number, onSelect: (genreId: number) => void }} props */
+export default function GenreFilter({ selectedGenre, onSelect }) {
   /** @type {{ id: number, name: string }[]} */
   const initialGenres = [];
 
@@ -35,15 +35,68 @@ export default function GenreFilter({ onSelect }) {
       {error !== "" && <Text>{error}</Text>}
 
       {/* Meddelar skärmen vilken genre som valts. 0 betyder All genres. */}
-      <ScrollView horizontal style={{ maxHeight: 50 }}>
-        <Button title="All genres" onPress={() => onSelect(0)} />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ maxHeight: 50 }}
+      >
+        <Pressable
+          onPress={() => onSelect(0)}
+          style={[
+            styles.genreButton,
+            selectedGenre === 0 && styles.selectedButton,
+          ]}
+        >
+          <Text
+            style={[
+              styles.genreText,
+              selectedGenre === 0 && styles.selectedText,
+            ]}
+          >
+            All genres
+          </Text>
+        </Pressable>
 
         {genres.map((genre) => (
-          <View key={genre.id} style={{ marginLeft: 8 }}>
-            <Button title={genre.name} onPress={() => onSelect(genre.id)} />
-          </View>
+          <Pressable
+            key={genre.id}
+            onPress={() => onSelect(genre.id)}
+            style={[
+              styles.genreButton,
+              selectedGenre === genre.id && styles.selectedButton,
+            ]}
+          >
+            <Text
+              style={[
+                styles.genreText,
+                selectedGenre === genre.id && styles.selectedText,
+              ]}
+            >
+              {genre.name}
+            </Text>
+          </Pressable>
         ))}
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  genreButton: {
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 24,
+    marginRight: 8,
+  },
+  selectedButton: {
+    backgroundColor: "#6b3fa0",
+  },
+  genreText: {
+    color: "#6b3fa0",
+    fontSize: 14,
+  },
+  selectedText: {
+    color: "#ffffff",
+  },
+});
