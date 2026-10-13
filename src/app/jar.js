@@ -10,8 +10,8 @@ import GenreFilter from "../components/GenreFilter";
 import { filterMoviesByGenre } from "../utils/filterMoviesByGenre";
 
 export default function MyJar() {
-  const movies = useSelector(selectJarMovies); // Läser burkens lista från Redux.
-  const dispatch = useDispatch();
+  const movies = useSelector(selectJarMovies); // Läser burkens lista från jarSlice i Redux.
+  const dispatch = useDispatch(); // UseDispatch är en hook från react-redux som ger tillgång till Redux-dispatchfunktionen.
   const [selectedGenre, setSelectedGenre] = useState(0); // 0 betyder All genres.
   const filteredMovies = filterMoviesByGenre(movies, selectedGenre);
 
@@ -24,6 +24,7 @@ export default function MyJar() {
     }
 
     router.push({
+      // push lägger till en ny post i historiken, till skillnad från router.replace som byter ut den nuvarande posten.
       pathname: "/movie",
       params: {
         id: randomMovie.id.toString(),

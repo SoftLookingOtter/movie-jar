@@ -12,11 +12,13 @@ export function filterMoviesByGenre(movies, genreId) {
   // TMDb använder olika genrefält för filmlistor och filmdetaljer.
   return movies.filter((movie) => {
     if (movie.genre_ids) {
-      return movie.genre_ids.includes(genreId); // Filmer från katalogen.
+      // lista med den här filmens genre-id:n från TMDb filmlista.
+      return movie.genre_ids.includes(genreId); // kontrollerar om den valda genren finns bland filmens genre-id:n. True om matchar, annars false.
     }
 
     if (movie.genres) {
-      return movie.genres.some((genre) => genre.id === genreId); // Filmer från detaljvyn.
+      // lista med den här filmens genre-id:n från TMDb filmdetaljer.
+      return movie.genres.some((genre) => genre.id === genreId); // kontrollerar om den valda genren finns bland filmens genre-id:n från detaljvyn. True om matchar, annars false.
     }
 
     return false; // Filmer utan genreinformation matchar inte filtret.

@@ -6,7 +6,7 @@ export function getRandomMovie(movies) {
     return null; // Ingen film kan väljas ur en tom lista.
   }
 
-  // Slumpar en plats i listan. Math.floor avrundar nedåt.
+  // Slumpar ett heltal som motsvarar en plats i listan, från 0 till sista platsen.
   const randomIndex = Math.floor(Math.random() * movies.length);
-  return movies[randomIndex];
+  return movies[randomIndex]; // Lämnar tillbaka filmen på den slumpade platsen.
 }

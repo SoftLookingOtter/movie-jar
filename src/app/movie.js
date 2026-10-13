@@ -11,18 +11,18 @@ import { getRandomMovie } from "../utils/randomMovie";
 import { filterMoviesByGenre } from "../utils/filterMoviesByGenre";
 
 export default function MovieDetails() {
-  const { id, fromShake, genreId } = useLocalSearchParams();
-  const dispatch = useDispatch();
-  const savedMovies = useSelector(selectJarMovies);
+  const { id, fromShake, genreId } = useLocalSearchParams(); // Hämtar parametrar från URL:en, t.ex. filmens id, om den kom från en slumpning och valt genreId. UseLocalSearchParams är en hook från expo-router.
+  const dispatch = useDispatch(); // UseDispatch är en hook från react-redux som ger tillgång till Redux-dispatchfunktionen.
+  const savedMovies = useSelector(selectJarMovies); // UseSelector är en hook från react-redux som hämtar state från Redux, här hämtas burkens filmer.
 
   // Avgör om knappen ska visa Add to jar eller Remove from jar.
   const isInJar = savedMovies.some(
     (savedMovie) => savedMovie.id.toString() === id,
-  );
+  ); // Är true om filmen redan finns i burken, annars false.
 
   // Använder genren från länken. Saknas den väljs All genres (0).
   const selectedGenre = typeof genreId === "string" ? Number(genreId) : 0;
-  const filteredMovies = filterMoviesByGenre(savedMovies, selectedGenre);
+  const filteredMovies = filterMoviesByGenre(savedMovies, selectedGenre); // Här körs funktionen från utils/filterMoviesByGenre.js för att filtrera burkens filmer baserat på den valda genren.
 
   const initialMovie =
     /** @type {{ id: number, title: string, overview: string, poster_path: string | null } | null} */ (
@@ -35,13 +35,13 @@ export default function MovieDetails() {
 
   // Slumpar igen bland sparade filmer som matchar burkens genrefilter.
   function handleShakeAgain() {
-    const randomMovie = getRandomMovie(filteredMovies);
+    const randomMovie = getRandomMovie(filteredMovies); // Kör funktionen från utils/randomMovie.js för att slumpa fram en film från de filtrerade burkfilmerna.
 
     if (randomMovie === null) {
       return;
     }
 
-    // Byter ut filmen så att bakåtknappen fortfarande leder till My jar.
+    // Byter ut filmen så att bakåtknappen fortfarande leder till My jar. Router.push hade lagt till en ny post i historiken, medan router.replace byter ut den nuvarande posten.
     router.replace({
       pathname: "/movie",
       params: {
@@ -64,7 +64,7 @@ export default function MovieDetails() {
           throw new Error("Missing movie ID.");
         }
 
-        const fetchedMovie = await getMovieDetails(id);
+        const fetchedMovie = await getMovieDetails(id); // Hämtar filmens detaljer från TMDB API.
         setMovie(fetchedMovie);
       } catch {
         setError("Could not load movie details. Please try again.");

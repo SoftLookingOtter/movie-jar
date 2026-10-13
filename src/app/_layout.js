@@ -1,5 +1,7 @@
-// Ger skärmarna tillgång till Redux-store i store.js, där burkens filmlista finns.
-// // Använder jarStorage.js för att läsa och spara burken på telefonen (lokal lagring genom AsyncStorage).
+// 1. RootLayout läser sparade filmer från telefonen med jarStorage.js
+// och lägger dem i Redux med restoreJar från jarSlice.js.
+// 2. Sedan visar den skärmarna index.js, jar.js, movie.js och about.js
+// och ger dem tillgång till burken i store.js.
 
 import { Stack } from "expo-router";
 import { Provider } from "react-redux";
@@ -13,30 +15,32 @@ export default function RootLayout() {
   const [jarLoaded, setJarLoaded] = useState(false); // Är den sparade burken inläst?
   const [storageError, setStorageError] = useState(""); // Feltext vid läsning eller sparande.
 
-  // Läser den sparade filmlistan när appen startar.
+  // 1. Läser den sparade filmlistan när appen startar och lägger den i Redux.
   useEffect(() => {
     async function loadSavedJar() {
       try {
-        const savedMovies = await loadJar(); // Läser den sparade filmlistan från telefonen.
-        store.dispatch(restoreJar(savedMovies)); // Skickar listan till Redux.
+        const savedMovies = await loadJar(); // Läser den sparade filmlistan från telefonen från jarStorage.js.
+        store.dispatch(restoreJar(savedMovies)); // Skickar listan till Redux via jarSlice.js.
         setJarLoaded(true);
       } catch {
         setStorageError("Could not load your jar. Please restart the app.");
       }
     }
 
-    loadSavedJar(); // Kör funktionen ovan när appen startar (men kör inte igen vid senare renderingar)
+    loadSavedJar(); // Kör funktionen ovan när appen startar (men kör inte igen vid senare renderingar, dvs körs inte vid ändringar av komponentens props eller state).
   }, []);
 
-  // Lyssnar på Redux och sparar burkens aktuella lista på telefonen.
+  // Startar lyssningen på Redux när den sparade burken är inläst.
   useEffect(() => {
     if (!jarLoaded) {
       return; // Väntar med sparandet tills den gamla listan har lästs.
     }
 
     const unsubscribe = store.subscribe(() => {
+      //
       const movies = store.getState().jar.movies;
 
+      // Sparar den aktuella filmlistan på telefonen via jarStorage.js.
       saveJar(movies).catch(() => {
         setStorageError(
           "Could not save your jar. Your latest changes may not be kept.",
@@ -57,7 +61,7 @@ export default function RootLayout() {
     return <Text style={{ marginTop: 60 }}>Loading your jar...</Text>;
   }
 
-  // Provider ger skärmarna nedan tillgång till vår Redux-store.
+  // 2. Provider ger skärmarna nedan tillgång till vår Redux-store.
   return (
     <Provider store={store}>
       <Stack>

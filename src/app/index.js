@@ -18,15 +18,12 @@ import { filterMoviesByGenre } from "../utils/filterMoviesByGenre";
 export default function App() {
   /** @type {{ id: number, title: string }[]} */
   const initialMovies = [];
-
   const [movies, setMovies] = useState(initialMovies);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState(0); // 0 betyder All genres.
-
-  // Filtrerar den filmlista som redan hämtats från API:et.
-  const filteredMovies = filterMoviesByGenre(movies, selectedGenre);
+  const filteredMovies = filterMoviesByGenre(movies, selectedGenre); // Filtrerar den filmlista som redan hämtats från API:et.
 
   // Hämtar populära filmer när katalogskärmen startar.
   useEffect(() => {
@@ -42,7 +39,7 @@ export default function App() {
     }
 
     loadMovies();
-  }, []);
+  }, []); // Körs bara en gång när komponenten mountas.
 
   // Söker efter filmer. Tom söktext visar populära filmer igen.
   async function handleSearch() {

@@ -16,6 +16,8 @@ const jarSlice = createSlice({
   reducers: {
     // RESTORE: återställer burken med tidigare sparade filmer (från telefonen).
     restoreJar(state, action) {
+      // state.movies är burkens lista. action.payload är listan från kommandot.
+      // Vid appstart skickar _layout.js hit listan som loadJar() läst från telefonen.
       state.movies = action.payload;
     },
 
